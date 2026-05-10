@@ -1,0 +1,34 @@
+[gd_scene load_steps=3 format=3 uid="uid://dswn7qcacmie7"]
+
+[ext_resource type="Script" uid="uid://xnvu5a3dwppe" path="res://scripts/cards/card_instance.gd" id="1_fa4yn"]
+[ext_resource type="Texture2D" uid="uid://o1h4t2fifmov" path="res://assets/placeholders/Soldier_TEST.png" id="2_5xgwh"]
+
+[node name="Card" type="Control"]
+custom_minimum_size = Vector2(180, 260)
+layout_mode = 3
+anchors_preset = 0
+script = ExtResource("1_fa4yn")
+
+[node name="CardFrame" type="TextureRect" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+texture = ExtResource("2_5xgwh")
+expand_mode = 1
+stretch_mode = 6
+
+[node name="StatsLabel" type="Label" parent="."]
+layout_mode = 1
+anchors_preset = 3
+anchor_left = 1.0
+anchor_top = 1.0
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = -25.0
+offset_top = -23.0
+grow_horizontal = 0
+grow_vertical = 0
+text = "1/1"

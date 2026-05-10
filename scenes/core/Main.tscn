@@ -1,0 +1,12 @@
+[gd_scene load_steps=3 format=3 uid="uid://bupfyakwbpfo0"]
+
+[ext_resource type="Script" uid="uid://b5llqko5j40jp" path="res://scripts/core/game_manager.gd" id="1_nrstr"]
+[ext_resource type="Script" uid="uid://ggvvu16niv88" path="res://scripts/core/turn_manager.gd" id="2_g3khn"]
+
+[node name="Main" type="Node"]
+
+[node name="GameManager" type="Node" parent="."]
+script = ExtResource("1_nrstr")
+
+[node name="TurnManager" type="Node" parent="."]
+script = ExtResource("2_g3khn")
