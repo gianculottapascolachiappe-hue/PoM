@@ -11,7 +11,7 @@ var current_size: Vector2
 var is_ready := false
 
 var is_hovered := false
-var base_position: Vector2
+
 
 
 # =========================
@@ -25,8 +25,6 @@ func _ready():
 	mouse_entered.connect(_on_mouse_entered)
 	mouse_exited.connect(_on_mouse_exited)
 
-	# store base position for hover offset system
-	base_position = position
 
 	if data != null:
 		update_visuals()
@@ -95,7 +93,7 @@ func _on_mouse_entered():
 	is_hovered = true
 
 	z_index = 10
-	position = base_position + Vector2(0, -10)
+	position.y -= 100
 
 	print("[Card] Hover:", data.card_name)
 
@@ -104,6 +102,6 @@ func _on_mouse_exited():
 	is_hovered = false
 
 	z_index = 0
-	position = base_position
+	position.y += 100
 
 	print("[Card] Unhover:", data.card_name)
