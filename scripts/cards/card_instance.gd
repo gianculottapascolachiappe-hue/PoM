@@ -1,53 +1,93 @@
 extends Control
 class_name CardInstance
 
-@onready var card_frame: TextureRect = $CardFrame
-@onready var stats_label: Label = $StatsLabel
+@onready var visual: Control = $Visual
+@onready var card_frame: TextureRect = $Visual/CardFrame
+@onready var stats_label: Label = $Visual/StatsLabel
 
+signal request_hand_relayout
+
+
+# =========================
+# CARD DATA
+# =========================
 var data: CardData
 var card_owner: String
 
+# delayed setup safety
+var pending_setup := false
+
+
+# =========================
+# SIZE SYSTEM
+# =========================
 var current_size: Vector2
-var is_ready := false
 
+
+# =========================
+# STATE
+# =========================
 var is_hovered := false
+var is_dragging := false
 
+
+# =========================
+# DRAG SYSTEM
+# =========================
+var drag_offset := Vector2.ZERO
+
+
+# =========================
+# ANIMATION
+# =========================
+var hover_tween: Tween
 
 
 # =========================
 # GODOT LIFECYCLE
 # =========================
 func _ready():
-	print("========== CARD READY ==========")
 
-	is_ready = true
+	print("========== CARD READY ==========")
 
 	mouse_entered.connect(_on_mouse_entered)
 	mouse_exited.connect(_on_mouse_exited)
 
-
-	if data != null:
+	# delayed setup support
+	if pending_setup:
+		pending_setup = false
 		update_visuals()
+
+
+func _process(delta):
+
+	# follow mouse while dragging
+	if is_dragging:
+		global_position = get_global_mouse_position() - drag_offset
 
 
 # =========================
 # INITIAL SETUP
 # =========================
 func setup(card_data: CardData, owner: String):
+
 	data = card_data
 	card_owner = owner
 
 	print("[CardInstance] Setup:", data.card_name)
 
-	# initialize size immediately (important for layout stability)
 	set_zone("hand")
 
-	if is_ready:
-		update_visuals()
+	# node not fully ready yet
+	if not is_node_ready():
+		pending_setup = true
+		return
+
+	update_visuals()
 
 
 # =========================
-# ZONE SYSTEM (LAYOUT ONLY)
+# ZONE SYSTEM
 # =========================
 func set_zone(zone: String):
 
@@ -55,6 +95,7 @@ func set_zone(zone: String):
 		return
 
 	match zone:
+
 		"hand":
 			current_size = data.base_size
 
@@ -87,21 +128,85 @@ func update_visuals():
 
 
 # =========================
-# HOVER SYSTEM (VISUAL ONLY)
+# INPUT
+# =========================
+func _gui_input(event):
+
+	if event is InputEventMouseButton:
+
+		# =========================
+		# START DRAG
+		# =========================
+		if event.button_index == MOUSE_BUTTON_LEFT and event.pressed:
+
+			is_dragging = true
+
+			drag_offset = get_global_mouse_position() - global_position
+
+			request_hand_relayout.emit()
+
+			print("[Card] Drag Start:", data.card_name)
+
+		# =========================
+		# END DRAG
+		# =========================
+		elif event.button_index == MOUSE_BUTTON_LEFT and not event.pressed:
+
+			is_dragging = false
+
+			request_hand_relayout.emit()
+
+			print("[Card] Drag End:", data.card_name)
+
+
+# =========================
+# HOVER SYSTEM
 # =========================
 func _on_mouse_entered():
+
+	if is_dragging:
+		return
+
 	is_hovered = true
 
-	z_index = 10
-	position.y -= 100
+	request_hand_relayout.emit()
+
+	if hover_tween:
+		hover_tween.kill()
+
+	hover_tween = create_tween()
+
+	hover_tween.tween_property(
+		visual,
+		"position:y",
+		-100,
+		0.12
+	).set_trans(Tween.TRANS_SINE)\
+	 .set_ease(Tween.EASE_OUT)
 
 	print("[Card] Hover:", data.card_name)
 
 
 func _on_mouse_exited():
+
+	if is_dragging:
+		return
+
 	is_hovered = false
 
-	z_index = 0
-	position.y += 100
+	request_hand_relayout.emit()
+
+	if hover_tween:
+		hover_tween.kill()
+
+	hover_tween = create_tween()
+
+	hover_tween.tween_property(
+		visual,
+		"position:y",
+		0,
+		0.10
+	).set_trans(Tween.TRANS_SINE)\
+	 .set_ease(Tween.EASE_OUT)
 
 	print("[Card] Unhover:", data.card_name)

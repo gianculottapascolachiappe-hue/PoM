@@ -11,7 +11,16 @@ size_flags_horizontal = 0
 size_flags_vertical = 0
 script = ExtResource("1_fa4yn")
 
-[node name="CardFrame" type="TextureRect" parent="."]
+[node name="Visual" type="Control" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+
+[node name="CardFrame" type="TextureRect" parent="Visual"]
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
@@ -22,7 +31,7 @@ texture = ExtResource("2_5xgwh")
 expand_mode = 1
 stretch_mode = 6
 
-[node name="StatsLabel" type="Label" parent="."]
+[node name="StatsLabel" type="Label" parent="Visual"]
 layout_mode = 1
 anchors_preset = 3
 anchor_left = 1.0
