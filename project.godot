@@ -22,4 +22,4 @@ ManaManager="*res://scripts/autoloads/mana_manager.gd"
 
 [display]
 
-window/stretch/mode="canvas_items"
+window/stretch/mode="viewport"

@@ -55,7 +55,8 @@ func draw_card():
 	card.setup(card_data, "player")
 
 	hand_container.add_child(card)
-
+	hand_container.arrange_hand()
+	
 	print("[GameManager] Drew card:", card_data.card_name)
 
 

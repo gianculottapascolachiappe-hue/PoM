@@ -1,6 +1,8 @@
 extends Resource
 class_name CardData
 
+@export var base_size := Vector2(180, 260)
+
 @export var card_name: String = ""
 
 @export var supertypes: Array[String] = []
