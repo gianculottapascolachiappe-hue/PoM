@@ -1,13 +1,13 @@
 extends Node
 
-@onready var hand_container = $"../HandContainer"
-
 enum TurnState {
 	PLAYER_TURN,
 	ENEMY_TURN
 }
 
 var current_turn: TurnState
+
+@onready var game_manager = get_node("../GameManager")
 
 
 func _ready():
@@ -16,97 +16,73 @@ func _ready():
 	current_turn = TurnState.PLAYER_TURN
 	print("[TurnManager] Initial turn set to PLAYER")
 
+	EventBus.game_started.connect(_on_game_started)
+
+func _on_game_started():
+	print("[TurnManager] Game started received")
 	_start_turn()
 
-
+# -------------------------
+# TURN INPUT TEST (OPTIONAL)
+# -------------------------
 func _input(event):
-	if event.is_action_pressed("ui_accept"):
-		var player_id = "player"
 
+	if event.is_action_pressed("ui_accept"):
 		print("=== ACTION TEST ===")
+
+		var player_id = "player"
 
 		if PriorityManager.can_act(player_id):
 			print("[TEST] Player is allowed to act")
 		else:
 			print("[TEST] Player is BLOCKED")
 
-		if event.is_action_pressed("ui_cancel"):
-			end_turn()
+	if event.is_action_pressed("ui_cancel"):
+		end_turn()
 
 
-# =========================
-# TURN FLOW (CLEAN VERSION)
-# =========================
+# -------------------------
+# TURN START
+# -------------------------
 func _start_turn():
 
 	print("===================================")
 	print("[TurnManager] TURN START")
 
 	match current_turn:
+
 		TurnState.PLAYER_TURN:
 			print("[TurnManager] Player Turn Begins")
 
 			EventBus.turn_started.emit("player")
+
 			PriorityManager.set_priority_for_player("player")
 			ManaManager.start_turn()
 
-			# TEMP TEST ONLY (keep here for now)
-			spawn_test_card()
+			# MTG CORE RULE:
+			game_manager.draw_card()
 
 		TurnState.ENEMY_TURN:
 			print("[TurnManager] Enemy Turn Begins")
 
 			EventBus.turn_started.emit("enemy")
+
 			PriorityManager.set_priority_for_player("enemy")
 			ManaManager.start_turn()
 
 
+# -------------------------
+# TURN SWITCH
+# -------------------------
 func end_turn():
+
 	print("[TurnManager] END TURN triggered")
 
 	if current_turn == TurnState.PLAYER_TURN:
-		print("[TurnManager] Switching to ENEMY TURN")
 		current_turn = TurnState.ENEMY_TURN
+		print("[TurnManager] Switching to ENEMY TURN")
 	else:
-		print("[TurnManager] Switching to PLAYER TURN")
 		current_turn = TurnState.PLAYER_TURN
+		print("[TurnManager] Switching to PLAYER TURN")
 
 	_start_turn()
-
-
-# =========================
-# CARD SPAWN (TEMP SYSTEM)
-# =========================
-func spawn_test_card():
-
-	print("[TurnManager] Spawning test card...")
-
-	var card_scene = preload("res://Scenes/Cards/Card.tscn")
-	var card = card_scene.instantiate()
-
-	hand_container.add_child(card)
-
-	var soldier_data = preload("res://Data/Cards/Soldier_TEST.tres")
-
-	card.setup(soldier_data, "player")
-
-	print("[TurnManager] Card added to HandContainer")
-
-
-# =========================
-# CAST TEST (TEMP SYSTEM)
-# =========================
-func try_cast_test_spell():
-	print("=== CAST ATTEMPT: Soldier_TEST ===")
-
-	if not PriorityManager.can_act("player"):
-		print("[CAST] BLOCKED by priority")
-		return
-
-	var paid = ManaManager.spend_white(1)
-
-	if paid:
-		print("[CAST] Soldier_TEST SUCCESSFULLY CAST")
-		EventBus.card_casted.emit("Soldier_TEST")
-	else:
-		print("[CAST] FAILED - Not enough mana")
