@@ -78,12 +78,17 @@ func end_turn():
 # CARD SPAWN (TEMP SYSTEM)
 # =========================
 func spawn_test_card():
+
 	print("[TurnManager] Spawning test card...")
 
 	var card_scene = preload("res://Scenes/Cards/Card.tscn")
-	var card_instance = card_scene.instantiate()
+	var card = card_scene.instantiate()
 
-	hand_container.add_child(card_instance)
+	hand_container.add_child(card)
+
+	var soldier_data = preload("res://Data/Cards/Soldier_TEST.tres")
+
+	card.setup(soldier_data, "player")
 
 	print("[TurnManager] Card added to HandContainer")
 
