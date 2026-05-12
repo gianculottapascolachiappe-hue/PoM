@@ -44,7 +44,6 @@ func draw_card():
 	var card = card_scene.instantiate()
 
 	card.setup(data, "player")
-	card.hand_container = hand_zone
 
 	hand_zone.add_child(card)
 
