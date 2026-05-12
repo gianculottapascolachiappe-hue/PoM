@@ -4,7 +4,7 @@
 [ext_resource type="Texture2D" uid="uid://o1h4t2fifmov" path="res://assets/placeholders/Soldier_TEST.png" id="2_5xgwh"]
 
 [node name="Card" type="Control"]
-custom_minimum_size = Vector2(180, 260)
+custom_minimum_size = Vector2(187.5, 261.5)
 layout_mode = 3
 anchors_preset = 0
 size_flags_horizontal = 0
