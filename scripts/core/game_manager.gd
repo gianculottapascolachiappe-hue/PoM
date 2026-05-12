@@ -1,75 +1,72 @@
 extends Node
 
-@onready var hand_container: Control = $"../HandContainer"
+@onready var hand_zone: HandZone = $"../Zones/HandZone"
+@onready var drop_zone: DropZone = $"../Zones/DropZone"
 
 var player_deck: Array[CardData] = []
-var player_hand_size := 7
+var hand_size := 7
+
 
 func _ready():
-	print("[GameManager] READY")
+	print("[GAME] READY")
 	_start_game()
 
 
 func _start_game():
-	print("[GameManager] Starting game flow...")
-
-	_setup_test_deck()
-	draw_starting_hand()
-
-	EventBus.game_started.emit()
-	print("[GameManager] Game started signal emitted")
+	_setup_deck()
+	_draw_starting_hand()
 
 
-# -------------------------
-# DECK SETUP
-# -------------------------
-func _setup_test_deck():
-	print("[GameManager] Setting up test deck...")
-
-	var soldier = preload("res://Data/Cards/Soldier_TEST.tres")
+func _setup_deck():
+	var card = preload("res://Data/Cards/Soldier_TEST.tres")
 
 	player_deck.clear()
 
 	for i in range(20):
-		player_deck.append(soldier)
+		player_deck.append(card)
 
 	player_deck.shuffle()
 
-	print("[GameManager] Deck size:", player_deck.size())
+
+func _draw_starting_hand():
+	for i in range(hand_size):
+		draw_card()
 
 
-# -------------------------
-# DRAW SINGLE CARD
-# -------------------------
 func draw_card():
 
 	if player_deck.is_empty():
-		print("[GameManager] No cards left to draw!")
 		return
 
-	var card_data = player_deck.pop_front()
+	var data = player_deck.pop_front()
 
 	var card_scene = preload("res://Scenes/Cards/Card.tscn")
 	var card = card_scene.instantiate()
 
-	card.setup(card_data, "player")
+	card.setup(data, "player")
+	card.hand_container = hand_zone
 
-	hand_container.add_child(card)
+	hand_zone.add_child(card)
 
-	card.request_hand_relayout.connect(
-		hand_container._on_card_relayout_requested
-	)
+	card.card_released.connect(_on_card_released)
+	card.request_hand_relayout.connect(hand_zone._on_card_relayout_requested)
 
-	hand_container.arrange_hand()
-
-	print("[GameManager] Drew card:", card_data.card_name)
+	hand_zone.arrange_hand()
 
 
-# -------------------------
-# STARTING HAND
-# -------------------------
-func draw_starting_hand():
-	print("[GameManager] Drawing starting hand...")
+func _on_card_released(card: CardInstance, pos: Vector2):
 
-	for i in range(player_hand_size):
-		draw_card()
+	print("[GAME] CARD RELEASED")
+
+	var inside = drop_zone.is_card_inside(card)
+
+	print("[GAME] INSIDE DROPZONE:", inside)
+
+	if inside:
+		print("[GAME] MOVE TO BATTLEFIELD")
+		card.zone = CardInstance.CardZone.BATTLEFIELD
+	else:
+		print("[GAME] RETURN TO HAND")
+		card.zone = CardInstance.CardZone.HAND
+
+	hand_zone.arrange_hand()

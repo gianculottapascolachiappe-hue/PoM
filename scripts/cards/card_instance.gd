@@ -1,212 +1,177 @@
 extends Control
 class_name CardInstance
 
+signal request_hand_relayout
+signal card_released(card: CardInstance, global_pos: Vector2)
+
 @onready var visual: Control = $Visual
 @onready var card_frame: TextureRect = $Visual/CardFrame
 @onready var stats_label: Label = $Visual/StatsLabel
 
-signal request_hand_relayout
-
-
-# =========================
-# CARD DATA
-# =========================
-var data: CardData
-var card_owner: String
-
-# delayed setup safety
-var pending_setup := false
-
-
-# =========================
-# SIZE SYSTEM
-# =========================
-var current_size: Vector2
-
+enum CardZone {
+	HAND,
+	BATTLEFIELD,
+	GRAVEYARD
+}
 
 # =========================
 # STATE
 # =========================
-var is_hovered := false
+var data: CardData
+var card_owner: String
+
+var zone: CardZone = CardZone.HAND
 var is_dragging := false
+var is_hovered := false
 
-
-# =========================
-# DRAG SYSTEM
-# =========================
+var hand_container: Control
 var drag_offset := Vector2.ZERO
 
-
-# =========================
-# ANIMATION
-# =========================
 var hover_tween: Tween
 
 
 # =========================
-# GODOT LIFECYCLE
+# READY
 # =========================
 func _ready():
-
-	print("========== CARD READY ==========")
-
 	mouse_entered.connect(_on_mouse_entered)
 	mouse_exited.connect(_on_mouse_exited)
 
-	# delayed setup support
-	if pending_setup:
-		pending_setup = false
-		update_visuals()
-
-
-func _process(delta):
-
-	# follow mouse while dragging
-	if is_dragging:
-		global_position = get_global_mouse_position() - drag_offset
-
 
 # =========================
-# INITIAL SETUP
+# SETUP
 # =========================
 func setup(card_data: CardData, owner: String):
-
 	data = card_data
 	card_owner = owner
 
-	print("[CardInstance] Setup:", data.card_name)
+	if is_node_ready():
+		_apply_setup()
+	else:
+		await ready
+		_apply_setup()
 
-	set_zone("hand")
 
-	# node not fully ready yet
-	if not is_node_ready():
-		pending_setup = true
+func _apply_setup():
+	if data == null:
 		return
 
 	update_visuals()
 
 
-# =========================
-# ZONE SYSTEM
-# =========================
-func set_zone(zone: String):
-
-	if data == null:
-		return
-
-	match zone:
-
-		"hand":
-			current_size = data.base_size
-
-		"battlefield":
-			current_size = data.base_size * 0.8
-
-		"graveyard":
-			current_size = data.base_size * 0.7
-
-		_:
-			current_size = data.base_size
-
-	custom_minimum_size = current_size
-
-
-# =========================
-# VISUAL UPDATE
-# =========================
 func update_visuals():
-
 	if data == null:
 		return
 
-	if data.card_texture:
+	if card_frame:
 		card_frame.texture = data.card_texture
 
 	stats_label.text = str(data.power) + "/" + str(data.toughness)
 
-	print("[CardInstance] Visuals updated")
+
+func _process(_delta):
+
+	if is_dragging:
+		global_position = get_global_mouse_position() - drag_offset
 
 
-# =========================
-# INPUT
-# =========================
 func _gui_input(event):
 
-	if event is InputEventMouseButton:
+	if not (event is InputEventMouseButton):
+		return
 
-		# =========================
-		# START DRAG
-		# =========================
-		if event.button_index == MOUSE_BUTTON_LEFT and event.pressed:
+	if event.button_index != MOUSE_BUTTON_LEFT:
+		return
 
-			is_dragging = true
 
-			drag_offset = get_global_mouse_position() - global_position
+	# =========================
+	# START DRAG
+	# =========================
+	if event.pressed:
 
-			request_hand_relayout.emit()
+		# only allow drag from hand
+		if zone != CardZone.HAND:
+			return
 
-			print("[Card] Drag Start:", data.card_name)
+		is_dragging = true
+		is_hovered = false
 
-		# =========================
-		# END DRAG
-		# =========================
-		elif event.button_index == MOUSE_BUTTON_LEFT and not event.pressed:
+		if hover_tween:
+			hover_tween.kill()
 
-			is_dragging = false
+		# store offset so card doesn't snap to mouse center
+		drag_offset = get_global_mouse_position() - global_position
 
-			request_hand_relayout.emit()
+		# IMPORTANT: allow interaction while dragging (DO NOT block input)
+		mouse_filter = Control.MOUSE_FILTER_PASS
 
-			print("[Card] Drag End:", data.card_name)
+		# mark for hand system
+		set_meta("dragging_lock", true)
+
+		# bring card visually above others
+		z_index = 1000
+
+		print("[CARD] DRAG START:", data.card_name)
+
+
+	# =========================
+	# DROP
+	# =========================
+	else:
+
+		if not is_dragging:
+			return
+
+		is_dragging = false
+
+		# restore normal interaction
+		mouse_filter = Control.MOUSE_FILTER_STOP
+
+		# release layout lock
+		set_meta("dragging_lock", false)
+
+		# reset z order
+		z_index = 0
+
+		print("[CARD] RELEASE:", data.card_name, "POS:", global_position)
+
+		# send final drop info to game logic
+		card_released.emit(self, global_position)
+
+		# request hand re-layout
+		request_hand_relayout.emit()
+
+		print("[CARD] DRAG END:", data.card_name)
 
 
 # =========================
-# HOVER SYSTEM
+# HOVER
 # =========================
 func _on_mouse_entered():
-
 	if is_dragging:
 		return
 
 	is_hovered = true
 
-	request_hand_relayout.emit()
-
 	if hover_tween:
 		hover_tween.kill()
 
 	hover_tween = create_tween()
 
-	hover_tween.tween_property(
-		visual,
-		"position:y",
-		-100,
-		0.12
-	).set_trans(Tween.TRANS_SINE)\
-	 .set_ease(Tween.EASE_OUT)
-
-	print("[Card] Hover:", data.card_name)
+	hover_tween.tween_property(visual, "position:y", -100, 0.12)\
+	.set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_OUT)
 
 
 func _on_mouse_exited():
-
 	if is_dragging:
 		return
 
 	is_hovered = false
 
-	request_hand_relayout.emit()
-
 	if hover_tween:
 		hover_tween.kill()
 
 	hover_tween = create_tween()
 
-	hover_tween.tween_property(
-		visual,
-		"position:y",
-		0,
-		0.10
-	).set_trans(Tween.TRANS_SINE)\
-	 .set_ease(Tween.EASE_OUT)
-
-	print("[Card] Unhover:", data.card_name)
+	hover_tween.tween_property(visual, "position:y", 0, 0.10)\
+	.set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_OUT)
