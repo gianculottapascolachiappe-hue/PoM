@@ -53,7 +53,7 @@ func arrange_hand():
 	# LAYOUT CALC
 	# =========================
 	var total_width = (count - 1) * overlap
-	var start_x = (size.x - total_width) * 0.5 - (card_width * 0.5)
+	var start_x = (size.x - total_width) * 0.5
 
 
 	# =========================
@@ -90,10 +90,14 @@ func arrange_hand():
 		# =========================
 		# SMOOTH TWEEN (CLEAN)
 		# =========================
+		card.position = Vector2(card.position.x, 0)
+
+
 		if card.has_meta("hand_tween"):
 			var old_tween = card.get_meta("hand_tween")
 			if old_tween:
 				old_tween.kill()
+
 
 		var tween = create_tween()
 		card.set_meta("hand_tween", tween)

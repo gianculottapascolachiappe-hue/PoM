@@ -1,0 +1,15 @@
+[gd_resource type="Resource" script_class="CardData" load_steps=3 format=3 uid="uid://dmkuoll3ql6qn"]
+
+[ext_resource type="Texture2D" uid="uid://cjwaus12xsxiv" path="res://assets/placeholders/Knight_TEST.png" id="1_fmegc"]
+[ext_resource type="Script" uid="uid://dq0vtpyqogtvc" path="res://scripts/cards/card_data.gd" id="1_ogcre"]
+
+[resource]
+script = ExtResource("1_ogcre")
+card_types = Array[String](["Creature"])
+subtypes = Array[String](["Kinght"])
+mana_cost = "2W"
+mana_value = 3
+power = 2
+toughness = 2
+card_texture = ExtResource("1_fmegc")
+metadata/_custom_type_script = "uid://dq0vtpyqogtvc"
