@@ -1,71 +1,74 @@
 extends Control
 class_name HandZone
 
-@export var overlap := 80
+@export var overlap := 80.0
 @export var rearrange_speed := 0.15
+
+var _is_arranging := false
 
 
 func arrange_hand():
 
-	var valid_cards: Array = []
+	if _is_arranging:
+		return
 
-	# =========================
-	# COLLECT ONLY HAND CARDS
-	# =========================
+	_is_arranging = true
+
+	print("\n================ HAND ARRANGE START ================\n")
+
+	var cards: Array[CardInstance] = []
+
+	# ---------------------------------------------
+	# SOURCE OF TRUTH (TEMP: scene children only)
+	# ---------------------------------------------
 	for c in get_children():
+		if c is CardInstance:
+			cards.append(c)
 
-		if not (c is Control):
-			continue
+	print("[HAND] Card count:", cards.size())
 
-		# safety check (cards not fully initialized yet)
-		if not "zone" in c:
-			continue
-
-		if c.zone != CardInstance.CardZone.HAND:
-			continue
-
-		valid_cards.append(c)
-
-
-	var count = valid_cards.size()
+	var count := cards.size()
 
 	if count == 0:
+		print("[HAND] EXIT: no cards\n")
+		_is_arranging = false
 		return
 
 
-	# =========================
-	# STOP IF ANY CARD IS DRAGGING
-	# =========================
-	for c in valid_cards:
-		if c.is_dragging:
-			return
-
-
-	# =========================
-	# CARD SIZE (SAFE)
-	# =========================
+	# ---------------------------------------------
+	# CARD WIDTH SAFETY
+	# ---------------------------------------------
 	var card_width := 180.0
-	if valid_cards.size() > 0:
-		card_width = valid_cards[0].size.x
+	if cards[0].size.x > 0:
+		card_width = cards[0].size.x
+
+	print("[HAND] Card width:", card_width)
 
 
-	# =========================
+	# ---------------------------------------------
 	# LAYOUT CALC
-	# =========================
-	var total_width = (count - 1) * overlap
-	var start_x = (size.x - total_width) * 0.5
+	# ---------------------------------------------
+	var total_width := (count - 1) * overlap
+	var start_x := (size.x - total_width) * 0.5 - (card_width * 0.5)
+
+	print("[HAND] Zone size:", size)
+	print("[HAND] Total width:", total_width)
+	print("[HAND] Start X:", start_x)
 
 
-	# =========================
+	# ---------------------------------------------
 	# POSITION CARDS
-	# =========================
+	# ---------------------------------------------
 	for i in range(count):
 
-		var card = valid_cards[i]
+		var card := cards[i]
 
-		# =========================
-		# Z-INDEX RULES
-		# =========================
+		print("\n--- CARD DEBUG ---")
+		print("Name:", card.data.card_name if card.data else "NULL")
+		print("Index:", i)
+		print("Before position:", card.position)
+
+		# Z INDEX
 		if card.is_dragging:
 			card.z_index = 1000
 		elif card.is_hovered:
@@ -74,40 +77,40 @@ func arrange_hand():
 			card.z_index = i
 
 
-		# =========================
-		# DO NOT MOVE DRAGGED CARD
-		# =========================
+		# SKIP DRAGGING
 		if card.is_dragging:
+			print("SKIP (dragging)")
 			continue
 
 
-		var target_position = Vector2(
+		var target := Vector2(
 			start_x + i * overlap,
 			0
 		)
 
+		print("Target:", target)
 
-		# =========================
-		# SMOOTH TWEEN (CLEAN)
-		# =========================
-		card.position = Vector2(card.position.x, 0)
-
-
+		# ---------------------------------------------
+		# CANCEL OLD TWEEN SAFELY
+		# ---------------------------------------------
 		if card.has_meta("hand_tween"):
 			var old_tween = card.get_meta("hand_tween")
 			if old_tween:
 				old_tween.kill()
 
+		card.position.y = 0
 
-		var tween = create_tween()
+		var tween := create_tween()
 		card.set_meta("hand_tween", tween)
 
-		tween.tween_property(
-			card,
-			"position",
-			target_position,
-			rearrange_speed
-		).set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_OUT)
+		tween.tween_property(card, "position", target, rearrange_speed)\
+			.set_trans(Tween.TRANS_SINE)\
+			.set_ease(Tween.EASE_OUT)
+
+
+	print("\n================ HAND ARRANGE END ================\n")
+
+	_is_arranging = false
 
 
 func _on_card_relayout_requested():
