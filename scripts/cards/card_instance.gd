@@ -1,3 +1,4 @@
+#card_instance.gd
 extends Control
 class_name CardInstance
 

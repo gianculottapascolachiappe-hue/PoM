@@ -1,10 +1,10 @@
+#player_permanents_zone.gd
 extends Control
 class_name PlayerPermanentsZone
 
 @export var spacing := 220
 @export var move_speed := 0.15
 
-@onready var zone_manager: ZoneManager = get_node("/root/ZoneManager")
 
 
 func arrange_cards():
@@ -13,7 +13,7 @@ func arrange_cards():
 	# -------------------------------------------------
 	# SOURCE OF TRUTH = ZoneManager
 	# -------------------------------------------------
-	var cards: Array[CardInstance] = zone_manager.get_battlefield_cards()
+	var cards: Array = ZoneManager.get_battlefield_cards()
 
 	print("[BATTLEFIELD] Card count:", cards.size())
 

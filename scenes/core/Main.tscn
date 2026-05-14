@@ -38,7 +38,7 @@ grow_horizontal = 2
 grow_vertical = 2
 script = ExtResource("3_kitw3")
 
-[node name="PlayerPermanentsZone" type="Control" parent="Zones"]
+[node name="PlayerPermanentsZone" type="Control" parent="Zones" groups=["battlefield_zone"]]
 layout_mode = 1
 anchor_top = 0.5
 anchor_right = 1.0
@@ -47,7 +47,7 @@ grow_horizontal = 2
 grow_vertical = 2
 script = ExtResource("4_a4rsn")
 
-[node name="HandZone" type="Control" parent="Zones"]
+[node name="HandZone" type="Control" parent="Zones" groups=["hand_zone"]]
 custom_minimum_size = Vector2(0, 261.5)
 layout_mode = 1
 anchors_preset = 12

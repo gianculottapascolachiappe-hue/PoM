@@ -4,6 +4,7 @@ class_name HandZone
 @export var overlap := 80.0
 @export var rearrange_speed := 0.15
 
+
 var _is_arranging := false
 
 
@@ -16,14 +17,11 @@ func arrange_hand():
 
 	print("\n================ HAND ARRANGE START ================\n")
 
-	var cards: Array[CardInstance] = []
 
 	# ---------------------------------------------
 	# SOURCE OF TRUTH (TEMP: scene children only)
 	# ---------------------------------------------
-	for c in get_children():
-		if c is CardInstance:
-			cards.append(c)
+	var cards: Array = ZoneManager.get_hand_cards()
 
 	print("[HAND] Card count:", cards.size())
 
@@ -61,7 +59,7 @@ func arrange_hand():
 	# ---------------------------------------------
 	for i in range(count):
 
-		var card := cards[i]
+		var card: CardInstance = cards[i]
 
 		print("\n--- CARD DEBUG ---")
 		print("Name:", card.data.card_name if card.data else "NULL")
