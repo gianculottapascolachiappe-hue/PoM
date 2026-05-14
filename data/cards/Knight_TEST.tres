@@ -5,6 +5,8 @@
 
 [resource]
 script = ExtResource("1_ogcre")
+card_id = "002"
+card_name = "Knight_TEST"
 card_types = Array[String](["Creature"])
 subtypes = Array[String](["Kinght"])
 mana_cost = "2W"

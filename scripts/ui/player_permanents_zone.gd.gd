@@ -5,88 +5,98 @@ class_name PlayerPermanentsZone
 @export var spacing := 220
 @export var move_speed := 0.15
 
+var battlefield_stacks: Dictionary = {}
 
 
 func arrange_cards():
 	print("\n================ BATTLEFIELD ARRANGE START ================\n")
 
-	# -------------------------------------------------
-	# SOURCE OF TRUTH = ZoneManager
-	# -------------------------------------------------
 	var cards: Array = ZoneManager.get_battlefield_cards()
 
 	print("[BATTLEFIELD] Card count:", cards.size())
 
-	var count = cards.size()
+	battlefield_stacks.clear()
 
-	if count == 0:
-		print("[BATTLEFIELD] EXIT: no cards\n")
-		return
-
-
-	# -------------------------------------------------
-	# CENTERING CALCULATION
-	# -------------------------------------------------
-	var total_width = (count - 1) * spacing
-	var start_x = (size.x - total_width) * 0.5
-
-	print("[BATTLEFIELD] Zone size:", size)
-	print("[BATTLEFIELD] Total width:", total_width)
-	print("[BATTLEFIELD] Start X:", start_x)
-
-
-	# -------------------------------------------------
-	# POSITION CARDS
-	# -------------------------------------------------
-	for i in range(count):
-
-		var card: CardInstance = cards[i]
-
+	# ---------------------------------------------
+	# BUILD STACKS (SOURCE OF TRUTH GROUPING)
+	# ---------------------------------------------
+	for card in cards:
 		if not is_instance_valid(card):
 			continue
 
-		print("\n--- CARD DEBUG ---")
-		print("Name:", card.data.card_name if card.data else "NULL")
-		print("Index:", i)
-		print("Before position:", card.position)
+		var id = card.data  # IMPORTANT: use CardData reference
 
-		# Z-index rule
-		if card.is_dragging:
-			card.z_index = 1000
-		else:
+		if not battlefield_stacks.has(id):
+			battlefield_stacks[id] = []
+
+		battlefield_stacks[id].append(card)
+
+
+	if battlefield_stacks.is_empty():
+		print("[BATTLEFIELD] EXIT: no stacks\n")
+		return
+
+
+	# ---------------------------------------------
+	# LAYOUT STACKS (NOT INDIVIDUAL CARDS)
+	# ---------------------------------------------
+	var stack_count = battlefield_stacks.keys().size()
+	var total_width = (stack_count - 1) * spacing
+	var start_x = (size.x - total_width) * 0.5
+
+	print("[BATTLEFIELD] Stack count:", stack_count)
+	print("[BATTLEFIELD] Zone size:", size)
+	print("[BATTLEFIELD] Start X:", start_x)
+
+
+	var stack_index := 0
+
+	for id in battlefield_stacks.keys():
+		var stack: Array = battlefield_stacks[id]
+
+		var base_x = start_x + (stack_index * spacing)
+		stack_index += 1
+
+		print("\n--- STACK:", id, "SIZE:", stack.size(), "---")
+
+		for i in range(stack.size()):
+			var card: CardInstance = stack[i]
+
+			if not is_instance_valid(card):
+				continue
+
+			print("Card:", card.data.card_name, "Index in stack:", i)
+
+			# Z-index: top card is highest
 			card.z_index = i
 
-		# target position
-		var target_pos = Vector2(
-			start_x + (i * spacing),
-			-300
-		)
+			# Arena-style pile offset
+			var offset_x = i * 10
+			var offset_y = i * 10
 
-		print("Target position:", target_pos)
+			var target_pos = Vector2(
+				base_x + offset_x,
+				-300 + offset_y
+			)
 
-		# never fight drag
-		if card.is_dragging:
-			print("SKIP (dragging)")
-			continue
+			print("Target:", target_pos)
 
-		# kill old tween
-		if card.has_meta("battlefield_tween"):
-			var old_tween = card.get_meta("battlefield_tween")
-			if old_tween:
-				old_tween.kill()
+			if card.is_dragging:
+				continue
 
-		var tween = create_tween()
-		card.set_meta("battlefield_tween", tween)
+			if card.has_meta("battlefield_tween"):
+				var old_tween = card.get_meta("battlefield_tween")
+				if old_tween:
+					old_tween.kill()
 
-		print("Creating tween...")
+			var tween = create_tween()
+			card.set_meta("battlefield_tween", tween)
 
-		tween.tween_property(
-			card,
-			"position",
-			target_pos,
-			move_speed
-		).set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_OUT)
-
-		print("Tween applied")
+			tween.tween_property(
+				card,
+				"position",
+				target_pos,
+				move_speed
+			).set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_OUT)
 
 	print("\n================ BATTLEFIELD ARRANGE END ================\n")

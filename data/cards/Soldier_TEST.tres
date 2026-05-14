@@ -5,6 +5,7 @@
 
 [resource]
 script = ExtResource("1_navcq")
+card_id = "001"
 card_name = "Soldier_TEST"
 card_types = Array[String](["Creature"])
 subtypes = Array[String](["Human", "Knight"])
