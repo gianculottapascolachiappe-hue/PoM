@@ -46,7 +46,7 @@ func arrange_cards():
 			continue
 
 		print("\n--- CARD DEBUG ---")
-		print("Name:", card.data.card_name)
+		print("Name:", card.data.card_name if card.data else "NULL")
 		print("Index:", i)
 		print("Before position:", card.position)
 

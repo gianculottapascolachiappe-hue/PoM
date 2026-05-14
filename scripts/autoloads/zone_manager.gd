@@ -28,6 +28,9 @@ func register_card(card: CardInstance, zone: Zone, parent: Node) -> void:
 	if card == null:
 		return
 
+	if hand_cards.has(card) or battlefield_cards.has(card) or graveyard_cards.has(card):
+		_remove(card, card.zone)
+
 	parent.add_child(card)
 
 	card.zone = zone
@@ -120,17 +123,23 @@ func _add(card: CardInstance, zone: Zone) -> void:
 # ----------------------------
 # SAFE QUERIES
 # ----------------------------
-func get_hand_cards() -> Array:
-	var result: Array = []
+func get_hand_cards() -> Array[CardInstance]:
+	var result: Array[CardInstance] = []
 
 	for c in hand_cards:
-		if is_instance_valid(c) and c.zone == Zone.HAND:
+		if is_instance_valid(c) and c.data != null:
 			result.append(c)
 
 	return result
 
-func get_battlefield_cards() -> Array:
-	return battlefield_cards.filter(is_instance_valid)
+func get_battlefield_cards() -> Array[CardInstance]:
+	var result: Array[CardInstance] = []
+
+	for c in battlefield_cards:
+		if is_instance_valid(c) and c.data != null:
+			result.append(c)
+
+	return result
 
 func get_graveyard_cards() -> Array:
 	return graveyard_cards.filter(is_instance_valid)
