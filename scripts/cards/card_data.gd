@@ -1,3 +1,5 @@
+# card_data.gd
+
 extends Resource
 class_name CardData
 

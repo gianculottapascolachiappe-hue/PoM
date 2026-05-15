@@ -1,19 +1,29 @@
-#zone_manager.gd
+# zone_manager.gd (autoload)
 extends Node
 
+# -------------------------------------------------
+# ZONE MANAGER
+# -------------------------------------------------
+# Central zone system (single source of truth).
+# Handles card ownership between HAND, BATTLEFIELD,
+# and GRAVEYARD, including registration, movement,
+# and safe queries for UI/layout systems.
+# -------------------------------------------------
 
-# ----------------------------
-# ZONES (SINGLE SOURCE OF TRUTH)
-# ----------------------------
+
+# ==================================================
+# ZONES (GLOBAL STATE DEFINITIONS)
+# ==================================================
 enum Zone {
 	HAND,
 	BATTLEFIELD,
 	GRAVEYARD
 }
 
-# ----------------------------
-# STORAGE
-# ----------------------------
+
+# ==================================================
+# STORAGE (SOURCE OF TRUTH)
+# ==================================================
 var hand_cards: Array[CardInstance] = []
 var battlefield_cards: Array[CardInstance] = []
 var graveyard_cards: Array[CardInstance] = []
@@ -21,9 +31,9 @@ var graveyard_cards: Array[CardInstance] = []
 var DEBUG := true
 
 
-# ----------------------------
-# REGISTER
-# ----------------------------
+# ==================================================
+# REGISTER CARD INTO SYSTEM
+# ==================================================
 func register_card(card: CardInstance, zone: Zone, parent: Node) -> void:
 	if card == null:
 		return
@@ -40,9 +50,9 @@ func register_card(card: CardInstance, zone: Zone, parent: Node) -> void:
 		print("[ZONE] REGISTER:", card.name, "->", zone)
 
 
-# ----------------------------
-# MOVE (ONLY VALID WAY TO CHANGE ZONE)
-# ----------------------------
+# ==================================================
+# MOVE CARD BETWEEN ZONES (MAIN API)
+# ==================================================
 func move_card(card: CardInstance, from_zone: Zone, to_zone: Zone) -> void:
 	if card == null:
 		return
@@ -50,21 +60,20 @@ func move_card(card: CardInstance, from_zone: Zone, to_zone: Zone) -> void:
 	if DEBUG:
 		print("[ZONE] MOVE:", card.name, from_zone, "->", to_zone)
 
-	# 1. remove from old zone data
+	# 1. update zone storage
 	_remove(card, from_zone)
-
-	# 2. add to new zone data
 	_add(card, to_zone)
 
-	# 3. update logical state
+	# 2. update logical state
 	card.zone = to_zone
 
-	# 4. reset visuals
+	# 3. reset visual state
 	card.reset_visual_state()
 
-# ---------------------------------------
-# REPARENT VISUAL NODE (IMPORTANT FIX)
-# ---------------------------------------
+
+# ==================================================
+# RE-PARENTING LOGIC (VISUAL TREE HANDLING)
+# ==================================================
 	var new_parent: Node = null
 
 	match to_zone:
@@ -79,19 +88,20 @@ func move_card(card: CardInstance, from_zone: Zone, to_zone: Zone) -> void:
 		push_error("ZoneManager: missing zone group for " + str(to_zone))
 		return
 
-	# move card in scene tree
 	var old_parent = card.get_parent()
 
 	if old_parent != new_parent:
 		old_parent.remove_child(card)
 		new_parent.add_child(card)
-	print("[DEBUG] new_parent:", new_parent)
-	print("[DEBUG] card parent after:", card.get_parent())
-	print("[DEBUG] hand zone:", get_tree().get_first_node_in_group("hand_zone"))
 
-# ----------------------------
+	if DEBUG:
+		print("[ZONE] new_parent:", new_parent)
+		print("[ZONE] card parent after:", card.get_parent())
+
+
+# ==================================================
 # INTERNAL REMOVE
-# ----------------------------
+# ==================================================
 func _remove(card: CardInstance, zone: Zone) -> void:
 	match zone:
 		Zone.HAND:
@@ -102,9 +112,9 @@ func _remove(card: CardInstance, zone: Zone) -> void:
 			graveyard_cards.erase(card)
 
 
-# ----------------------------
+# ==================================================
 # INTERNAL ADD
-# ----------------------------
+# ==================================================
 func _add(card: CardInstance, zone: Zone) -> void:
 	match zone:
 		Zone.HAND:
@@ -120,9 +130,9 @@ func _add(card: CardInstance, zone: Zone) -> void:
 				graveyard_cards.append(card)
 
 
-# ----------------------------
-# SAFE QUERIES
-# ----------------------------
+# ==================================================
+# SAFE QUERIES (FILTERED OUTPUT FOR UI)
+# ==================================================
 func get_hand_cards() -> Array[CardInstance]:
 	var result: Array[CardInstance] = []
 
@@ -132,6 +142,7 @@ func get_hand_cards() -> Array[CardInstance]:
 
 	return result
 
+
 func get_battlefield_cards() -> Array[CardInstance]:
 	var result: Array[CardInstance] = []
 
@@ -140,6 +151,7 @@ func get_battlefield_cards() -> Array[CardInstance]:
 			result.append(c)
 
 	return result
+
 
 func get_graveyard_cards() -> Array:
 	return graveyard_cards.filter(is_instance_valid)

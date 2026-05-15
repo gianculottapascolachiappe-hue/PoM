@@ -1,15 +1,35 @@
+# turn_manager.gd
 extends Node
 
+# -------------------------------------------------
+# TTURN MANAGER
+# -------------------------------------------------
+# Manages the turn system (player/enemy flow),
+# handles turn start logic, priority setup,
+# mana reset, and simple test input triggers.
+# -------------------------------------------------
+
+
+# -------------------------------------------------
+# TURN STATES
+# -------------------------------------------------
 enum TurnState {
 	PLAYER_TURN,
 	ENEMY_TURN
 }
 
+
+# -------------------------------------------------
+# CURRENT TURN STATE
+# -------------------------------------------------
 var current_turn: TurnState
 
 @onready var game_manager = get_node("../GameManager")
 
 
+# -------------------------------------------------
+# READY
+# -------------------------------------------------
 func _ready():
 	print("[TurnManager] READY")
 
@@ -18,13 +38,15 @@ func _ready():
 
 	EventBus.game_started.connect(_on_game_started)
 
+
 func _on_game_started():
 	print("[TurnManager] Game started received")
 	_start_turn()
 
-# -------------------------
-# TURN INPUT TEST (OPTIONAL)
-# -------------------------
+
+# ==================================================
+# INPUT TESTING (DEBUG ONLY)
+# ==================================================
 func _input(event):
 
 	if event.is_action_pressed("ui_accept"):
@@ -41,9 +63,9 @@ func _input(event):
 		end_turn()
 
 
-# -------------------------
+# ==================================================
 # TURN START
-# -------------------------
+# ==================================================
 func _start_turn():
 
 	print("===================================")
@@ -59,7 +81,7 @@ func _start_turn():
 			PriorityManager.set_priority_for_player("player")
 			ManaManager.start_turn()
 
-			# MTG CORE RULE:
+			# MTG CORE RULE
 			game_manager.draw_card()
 
 		TurnState.ENEMY_TURN:
@@ -71,9 +93,9 @@ func _start_turn():
 			ManaManager.start_turn()
 
 
-# -------------------------
-# TURN SWITCH
-# -------------------------
+# ==================================================
+# TURN END / SWITCH
+# ==================================================
 func end_turn():
 
 	print("[TurnManager] END TURN triggered")

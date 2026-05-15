@@ -1,12 +1,38 @@
+# hand_zone.gd
 extends Control
 class_name HandZone
 
-@export var overlap := 80.0
-@export var rearrange_speed := 0.15
 
+
+# ====================================================================
+# HAND LAYOUT SETTINGS
+# ====================================================================
+# These directly affect card spacing & positioning
+# ====================================================================
+
+@export var overlap := 80.0
+# ↑ Distance between cards (lower = tighter hand, higher = more spread)
+
+@export var rearrange_speed := 0.15
+# ↑ Animation speed for card repositioning
+
+
+
+# ====================================================================
+# INTERNAL STATE
+# ====================================================================
+# Prevents overlapping layout recalculations
+# ====================================================================
 
 var _is_arranging := false
 
+
+
+# ====================================================================
+# ARRANGE HAND
+# ====================================================================
+# Repositions all cards in the player's hand
+# ====================================================================
 
 func arrange_hand():
 
@@ -18,9 +44,9 @@ func arrange_hand():
 	print("\n================ HAND ARRANGE START ================\n")
 
 
-	# ---------------------------------------------
-	# SOURCE OF TRUTH (TEMP: scene children only)
-	# ---------------------------------------------
+	# ------------------------------------------------
+	# SOURCE OF TRUTH
+	# ------------------------------------------------
 	var cards: Array = ZoneManager.get_hand_cards()
 
 	print("[HAND] Card count:", cards.size())
@@ -33,49 +59,40 @@ func arrange_hand():
 		return
 
 
-	# ---------------------------------------------
-	# CARD WIDTH SAFETY
-	# ---------------------------------------------
+	# ------------------------------------------------
+	# CARD SIZE REFERENCE
+	# ------------------------------------------------
 	var card_width := 180.0
+	# ↑ Fallback card width if dynamic size fails
+
 	if cards[0].size.x > 0:
 		card_width = cards[0].size.x
 
 	print("[HAND] Card width:", card_width)
 
 
-	# ---------------------------------------------
-	# LAYOUT CALC
-	# ---------------------------------------------
+	# ------------------------------------------------
+	# LAYOUT CALCULATION
+	# ------------------------------------------------
 	var total_width := (count - 1) * overlap
+
 	var start_x := (size.x - total_width) * 0.5 - (card_width * 0.5)
+	# ↑ Adjust this if hand alignment feels off-center
+
 
 	print("[HAND] Zone size:", size)
 	print("[HAND] Total width:", total_width)
 	print("[HAND] Start X:", start_x)
 
 
-	# ---------------------------------------------
+	# ------------------------------------------------
 	# POSITION CARDS
-	# ---------------------------------------------
+	# ------------------------------------------------
 	for i in range(count):
 
 		var card: CardInstance = cards[i]
 
-		print("\n--- CARD DEBUG ---")
-		print("Name:", card.data.card_name if card.data else "NULL")
-		print("Index:", i)
-		print("Before position:", card.position)
-
-		# Z INDEX
-		if card.is_dragging:
-			card.z_index = 1000
-		elif card.is_hovered:
-			card.z_index = 100 + i
-		else:
-			card.z_index = i
-
-
-		# SKIP DRAGGING
+		# Skip dragging cards (they control their own position)
 		if card.is_dragging:
 			print("SKIP (dragging)")
 			continue
@@ -88,9 +105,10 @@ func arrange_hand():
 
 		print("Target:", target)
 
-		# ---------------------------------------------
-		# CANCEL OLD TWEEN SAFELY
-		# ---------------------------------------------
+
+		# ------------------------------------------------
+		# CANCEL OLD TWEEN
+		# ------------------------------------------------
 		if card.has_meta("hand_tween"):
 			var old_tween = card.get_meta("hand_tween")
 			if old_tween:
@@ -110,6 +128,13 @@ func arrange_hand():
 
 	_is_arranging = false
 
+
+
+# ====================================================================
+# EXTERNAL HOOK
+# ====================================================================
+# Called when something requests a hand refresh
+# ====================================================================
 
 func _on_card_relayout_requested():
 	arrange_hand()
