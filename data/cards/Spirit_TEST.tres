@@ -1,0 +1,16 @@
+[gd_resource type="Resource" script_class="CardData" load_steps=3 format=3 uid="uid://bu2u3ye3wlffv"]
+
+[ext_resource type="Script" uid="uid://dq0vtpyqogtvc" path="res://scripts/cards/card_data.gd" id="1_fy8nw"]
+[ext_resource type="Texture2D" uid="uid://cngnmguf0m3vo" path="res://assets/placeholders/Spirit_TEST.png" id="1_odfwi"]
+
+[resource]
+script = ExtResource("1_fy8nw")
+card_id = "003"
+card_name = "Spirit_TEST"
+card_types = Array[String](["Creatire"])
+mana_cost = "5W"
+mana_value = 6
+power = 5
+toughness = 5
+card_texture = ExtResource("1_odfwi")
+metadata/_custom_type_script = "uid://dq0vtpyqogtvc"

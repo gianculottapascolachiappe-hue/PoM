@@ -1,0 +1,17 @@
+[gd_resource type="Resource" script_class="CardData" load_steps=3 format=3 uid="uid://ckumpngw5mkts"]
+
+[ext_resource type="Script" uid="uid://dq0vtpyqogtvc" path="res://scripts/cards/card_data.gd" id="1_cm24t"]
+[ext_resource type="Texture2D" uid="uid://pt3egc7m3wi4" path="res://assets/placeholders/Paladin_TEST.png" id="1_vrp02"]
+
+[resource]
+script = ExtResource("1_cm24t")
+card_id = "004"
+card_name = "Paladin_TEST"
+card_types = Array[String](["Creature"])
+subtypes = Array[String](["Human", "Paladin"])
+mana_cost = "1WW"
+mana_value = 3
+power = 3
+toughness = 4
+card_texture = ExtResource("1_vrp02")
+metadata/_custom_type_script = "uid://dq0vtpyqogtvc"

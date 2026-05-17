@@ -82,8 +82,8 @@ func arrange_cards():
 	var stack_count = battlefield_stacks.keys().size()
 
 	var total_width = (stack_count - 1) * spacing
-
-	var start_x = (size.x - total_width) * 0.5
+	
+	var start_x = (size.x - total_width) * 0.5 
 	# ↑ Adjust if battlefield feels too left/right shifted
 
 

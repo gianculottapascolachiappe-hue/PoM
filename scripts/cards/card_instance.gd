@@ -82,10 +82,10 @@ var hover_tween: Tween
 # Change these values to tweak hover feel.
 # ====================================================================
 
-@export var hover_lift_height := -170
+@export var hover_lift_height := -360
 # ↑ Higher negative value = card lifts higher on hover
 
-@export var hover_scale := Vector2(1.5, 1.5)
+@export var hover_scale := Vector2(2, 2)
 # ↑ Increase for bigger hover zoom effect
 
 @export var hover_speed := 0.12

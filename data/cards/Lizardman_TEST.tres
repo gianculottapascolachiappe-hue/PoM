@@ -1,0 +1,17 @@
+[gd_resource type="Resource" script_class="CardData" load_steps=3 format=3 uid="uid://cqaddtvbopeag"]
+
+[ext_resource type="Texture2D" uid="uid://g63ax50blyud" path="res://assets/placeholders/Lizardman_TEST.png" id="1_vaji1"]
+[ext_resource type="Script" uid="uid://dq0vtpyqogtvc" path="res://scripts/cards/card_data.gd" id="1_vufav"]
+
+[resource]
+script = ExtResource("1_vufav")
+card_id = "005"
+card_name = "Lizardman_TEST"
+card_types = Array[String](["Creature"])
+subtypes = Array[String](["Lizard", "Warrior"])
+mana_cost = "2RW"
+mana_value = 4
+power = 3
+toughness = 3
+card_texture = ExtResource("1_vaji1")
+metadata/_custom_type_script = "uid://dq0vtpyqogtvc"

@@ -44,6 +44,9 @@ func _setup_deck():
 
 	var soldier = preload("res://Data/Cards/Soldier_TEST.tres")
 	var knight = preload("res://Data/Cards/Knight_TEST.tres")
+	var lizardman = preload("res://Data/Cards/Lizardman_TEST.tres")
+	var paladin = preload("res://Data/Cards/Paladin_TEST.tres")
+	var spirit = preload("res://Data/Cards/Spirit_TEST.tres")
 
 	player_deck.clear()
 
@@ -52,6 +55,15 @@ func _setup_deck():
 
 	for i in range(10):
 		player_deck.append(knight)
+
+	for i in range(4):
+		player_deck.append(lizardman)
+
+	for i in range(4):
+		player_deck.append(paladin)
+
+	for i in range(2):
+		player_deck.append(spirit)
 
 	player_deck.shuffle()
 

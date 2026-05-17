@@ -16,7 +16,15 @@ class_name HandZone
 @export var rearrange_speed := 0.15
 # ↑ Animation speed for card repositioning
 
+# --------------------------------------------------
+# FAN SETTINGS
+# --------------------------------------------------
 
+@export var fan_curve_height := 40.0
+# <--- Higher = stronger arc
+
+@export var fan_rotation := 12.0
+# <--- Higher = stronger card angles
 
 # ====================================================================
 # INTERNAL STATE
@@ -62,7 +70,7 @@ func arrange_hand():
 	# ------------------------------------------------
 	# CARD SIZE REFERENCE
 	# ------------------------------------------------
-	var card_width := 180.0
+	var card_width := 187.5
 	# ↑ Fallback card width if dynamic size fails
 
 	if cards[0].size.x > 0:
