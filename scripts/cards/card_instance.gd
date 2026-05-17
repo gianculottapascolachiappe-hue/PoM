@@ -74,6 +74,7 @@ var is_hovered := false
 var drag_offset := Vector2.ZERO
 var hover_tween: Tween
 
+var hover_delay_timer: SceneTreeTimer
 
 
 # ====================================================================
@@ -281,7 +282,6 @@ func _on_mouse_entered():
 	if zone != ZoneManager.Zone.HAND:
 		return
 
-	is_hovered = true
 
 	if hover_tween:
 		hover_tween.kill()

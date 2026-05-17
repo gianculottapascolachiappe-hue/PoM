@@ -20,6 +20,7 @@ EventBus="*res://scripts/autoloads/event_bus.gd"
 PriorityManager="*res://scripts/autoloads/priority_manager.gd"
 ManaManager="*res://scripts/autoloads/mana_manager.gd"
 ZoneManager="*res://scripts/autoloads/zone_manager.gd"
+CardPlayManager="*res://scripts/autoloads/card_play_manager.gd"
 
 [display]
 

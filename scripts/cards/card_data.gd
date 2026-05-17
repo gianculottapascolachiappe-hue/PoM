@@ -3,7 +3,7 @@
 extends Resource
 class_name CardData
 
-@export var base_size := Vector2(180, 260)
+@export var base_size := Vector2(375, 523)
 
 @export var card_id: String = ""
 @export var card_name: String = ""

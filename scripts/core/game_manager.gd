@@ -32,7 +32,17 @@ func _ready():
 	_setup_deck()
 	_draw_starting_hand()
 
+	print("\n=== MANA TEST START ===")
 
+	ManaManager.start_turn()
+
+	print("Can pay 1 white?", ManaManager.can_pay_white(1))
+	print("Can pay 2 white?", ManaManager.can_pay_white(2))
+
+	print("Pay 1 white:", ManaManager.pay_white(1))
+	print("After payment, can pay 1 white?", ManaManager.can_pay_white(1))
+
+	print("=== MANA TEST END ===\n")
 
 # ====================================================================
 # DECK SETUP
@@ -66,6 +76,31 @@ func _setup_deck():
 		player_deck.append(spirit)
 
 	player_deck.shuffle()
+
+
+# --------------------------------------------------
+# TEMP PLAY VALIDATION TEST
+# --------------------------------------------------
+func _input(event):
+
+	if event.is_action_pressed("ui_accept"):
+
+		print("\n========== TEST PLAY VALIDATION ==========")
+
+		var hand := ZoneManager.get_hand_cards()
+
+		if hand.is_empty():
+			print("[TEST] No cards in hand")
+			return
+
+		var test_card: CardInstance = hand[0]
+
+		print("[TEST] Testing:",
+			test_card.data.card_name)
+
+		var result := CardPlayManager.can_play(test_card)
+
+		print("[TEST] RESULT:", result)
 
 
 
